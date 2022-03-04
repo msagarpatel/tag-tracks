@@ -1,7 +1,6 @@
 function tagtracks#FormatTagItem(index, item) abort
   const item_nr = a:index + 1
   const tagname = a:item.tagname
-  const match = a:item.matchnr
 
   " getbufline() returns an empty List if the buffer passed is not loaded.
   " So, if the file corresponding to a TagStack entry is not open, then that
@@ -16,7 +15,6 @@ function tagtracks#FormatTagItem(index, item) abort
         \ text)
   return #{item: item_nr,
         \ tag: tagname,
-        \ match: match,
         \ origin: original_loc}
 endfunction
 
@@ -25,18 +23,15 @@ function tagtracks#FormatTagStack(tags) abort
 
   const item_length = max([strlen('Item')] + mapnew(lines, {_, v -> strlen(v.item)})) + 2
   const tag_length = max([strlen('Tag')] + mapnew(lines, {_, v -> strlen(v.tag)})) + 2
-  const match_length = max([strlen('Match')] + mapnew(lines, {_, v -> strlen(v.match)})) + 2
 
   return [  '  ' .
         \   'Item' . repeat(' ', item_length - strlen('Item')) .
         \   'Tag' . repeat(' ', tag_length - strlen('Tag')) .
-        \   'Match' . repeat(' ', match_length - strlen('Match')) .
         \   'Origin']
-        \ + mapnew(lines, {k, v -> printf('%s%s%s%s%s',
+        \ + mapnew(lines, {k, v -> printf('%s%s%s%s',
         \   (k is# a:tags.curidx - 1) ? '> ' : '  ',
         \   v.item . repeat(' ', item_length - strlen(v.item)),
         \   v.tag . repeat(' ', tag_length - strlen(v.tag)),
-        \   v.match . repeat(' ', match_length - strlen(v.match)),
         \   v.origin)})
         \ + [(a:tags.curidx > a:tags.length) ? '>' : '']
 endfunction
@@ -94,8 +89,8 @@ function tagtracks#StartTagTracks()
   setlocal noswapfile
   setlocal nobuflisted
   " set colors in display to mirror :tags
-  syntax match Title /\vItem\s+Tag\s+Match\s+Origin/
-  syntax match Directory /\v\d+\s+\S+\s+\d+\s+\S+:\d+\s+\zs.*$/
+  syntax match Title /\vItem\s+Tag\s+Origin/
+  syntax match Directory /\v\d+\s+\S+\s+\S+:\d+\s+\zs.*$/
   file TagTracks
   " window id where display will live
   const display_id = win_getid()
